@@ -30,21 +30,25 @@ func NewApi(client *mongo.Client, addr string, db_name string, db_cpu_stor db.Cp
 	}
 }
 func (a *Api) Run(wg *sync.WaitGroup) {
-	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("API starting on adress :" + a.addr)
+	go func() {
+		wg.Add(1)
+		logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("API starting on adress :" + a.addr)
 
-	cpuhandler := NewCpuHandler(a.db_cpu_stor)
-	ifacehandler := NewIfaceHandler(a.db_iface_stor)
-	r := gin.Default()
-	//CPUhandlers
-	r.GET("/cpu", cpuhandler.GetCpu)
-	r.GET("/cpu/:id", cpuhandler.GetCpuByID)
-	//interface handlers
-	r.GET("/iface", ifacehandler.GetIfaces)
-	r.GET("/iface/:id", ifacehandler.GetIfacesByID)
-	err := r.Run(a.addr)
-	if err != nil {
-		log.Fatal(err)
+		cpuhandler := NewCpuHandler(a.db_cpu_stor)
+		ifacehandler := NewIfaceHandler(a.db_iface_stor)
+		r := gin.Default()
+		//CPUhandlers
+		r.GET("/cpu", cpuhandler.GetCpu)
+		r.GET("/cpu/:id", cpuhandler.GetCpuByID)
+		//interface handlers
+		r.GET("/iface", ifacehandler.GetIfaces)
+		r.GET("/iface/:id", ifacehandler.GetIfacesByID)
+		err := r.Run(a.addr)
+		if err != nil {
+			log.Fatal(err)
 
-	}
-	defer wg.Done()
+		}
+
+		defer wg.Done()
+	}()
 }

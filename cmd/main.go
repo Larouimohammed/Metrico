@@ -31,15 +31,14 @@ func main() {
 	var c = db.NewMongoCpuMetricStore(client, mongo_db_name)
 	var i = db.NewMongoIfaceMetricStore(client, mongo_db_name)
 	wg := &sync.WaitGroup{}
-	wg.Add(2)
 	//Run api
 	api := metrikoapi.NewApi(client, addr, mongo_db_name, c, i)
-	go api.Run(wg)
+	api.Run(wg)
 
 	//run metriko agent
 
 	agent := metrikoagent.NewAgent(net.IPAddr{IP: net.IPv4(192, 168, 1, 11)}, addrServer)
-	go agent.StartMetriko(wg)
+	agent.StartMetriko(wg)
 
 	//run server
 	server := metrikoserver.NewServer(c, i, addrServer)

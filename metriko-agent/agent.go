@@ -30,30 +30,30 @@ func NewAgent(machine net.IPAddr, addr string) *Agent {
 	}
 }
 func (a *Agent) StartMetriko(wg *sync.WaitGroup) {
-	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Agent Starting on adress :" + a.Addr)
+	go func() {
+		wg.Add(1)
+		logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Agent Starting on adress :" + a.Addr)
 
-	conn, err := net.Dial("tcp", a.Addr)
-	if err != nil {
-		fmt.Println("Error connecting:", err)
-		return
-	}
+		conn, err := net.Dial("tcp", a.Addr)
+		if err != nil {
+			fmt.Println("Error connecting:", err)
+			return
+		}
+		var msg Message
+		msg.Type = "json"
+		msg.Cpupayload = a.GetCpu()
+		msg.Ifacepayload = a.ListIface()
 
-	defer conn.Close()
-	defer wg.Done()
-
-	var msg Message
-	msg.Type = "json"
-	msg.Cpupayload = a.GetCpu()
-	msg.Ifacepayload = a.ListIface()
-
-	data, err := json.Marshal(msg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = conn.Write(data)
-	if err != nil {
-		log.Fatal(err)
-	}
-	time.Sleep(1 * time.Second)
-
+		data, err := json.Marshal(msg)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = conn.Write(data)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer conn.Close()
+		defer wg.Done()
+		time.Sleep(1 * time.Second)
+	}()
 }
