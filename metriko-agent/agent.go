@@ -29,7 +29,7 @@ func NewAgent(machine net.IPAddr, addr string) *Agent {
 	}
 }
 func (a *Agent) SendMetriko() {
-	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Agent Starting on adress :"+ a.Addr)
+	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Agent Starting on adress :" + a.Addr)
 
 	conn, err := net.Dial("tcp", a.Addr)
 	if err != nil {
@@ -38,21 +38,20 @@ func (a *Agent) SendMetriko() {
 	}
 
 	defer conn.Close()
-	
 
-		var msg Message
-		msg.Type = "json"
-		msg.Cpupayload = a.GetCpu()
-		msg.Ifacepayload = a.ListIface()
+	var msg Message
+	msg.Type = "json"
+	msg.Cpupayload = a.GetCpu()
+	msg.Ifacepayload = a.ListIface()
 
-		data, err := json.Marshal(msg)
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = conn.Write(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-		time.Sleep(1 * time.Second)
-	
+	data, err := json.Marshal(msg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = conn.Write(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	time.Sleep(1 * time.Second)
+
 }
