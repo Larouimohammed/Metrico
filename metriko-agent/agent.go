@@ -6,6 +6,7 @@ import (
 	"log"
 	"metriko/hardware"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -28,7 +29,7 @@ func NewAgent(machine net.IPAddr, addr string) *Agent {
 		Addr:    addr,
 	}
 }
-func (a *Agent) SendMetriko() {
+func (a *Agent) SendMetriko(wg *sync.WaitGroup) {
 	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Agent Starting on adress :" + a.Addr)
 
 	conn, err := net.Dial("tcp", a.Addr)
@@ -38,6 +39,7 @@ func (a *Agent) SendMetriko() {
 	}
 
 	defer conn.Close()
+	defer wg.Done()
 
 	var msg Message
 	msg.Type = "json"

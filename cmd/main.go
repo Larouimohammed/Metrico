@@ -34,15 +34,16 @@ func main() {
 	wg.Add(2)
 	//Run api
 	api := metrikoapi.NewApi(client, addr, mongo_db_name, c, i)
-	go api.Run()
+	go api.Run(wg)
 
 	//run metriko agent
 	agent := metricagent.NewAgent(net.IPAddr{IP: net.IPv4(192, 168, 1, 11)}, addrServer)
-	go agent.SendMetriko()
+	go agent.SendMetriko(wg)
 
 	//run server
 	server := metrikoserver.NewServer(c, i, addrServer)
 	server.Start()
 	wg.Wait()
+
 
 }

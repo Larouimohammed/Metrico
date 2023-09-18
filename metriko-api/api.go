@@ -3,6 +3,7 @@ package metrikoapi
 import (
 	"log"
 	"metriko/db"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,8 +29,8 @@ func NewApi(client *mongo.Client, addr string, db_name string, db_cpu_stor db.Cp
 		db_iface_stor: db_iface_stor,
 	}
 }
-func (a *Api) Run() {
-	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("API starting on adress :"+ a.addr)
+func (a *Api) Run(wg *sync.WaitGroup) {
+	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("API starting on adress :" + a.addr)
 
 	cpuhandler := NewCpuHandler(a.db_cpu_stor)
 	ifacehandler := NewIfaceHandler(a.db_iface_stor)
@@ -45,5 +46,5 @@ func (a *Api) Run() {
 		log.Fatal(err)
 
 	}
-
+	defer wg.Done()
 }
