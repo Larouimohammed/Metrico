@@ -39,21 +39,33 @@ func (a *Agent) StartMetriko(wg *sync.WaitGroup) {
 			fmt.Println("Error connecting:", err)
 			return
 		}
+		buffer := make([]byte, 1024)
 		var msg Message
-		msg.Type = "json"
-		msg.Cpupayload = a.GetCpu()
-		msg.Ifacepayload = a.ListIface()
 
-		data, err := json.Marshal(msg)
-		if err != nil {
-			log.Fatal(err)
+		for {
+			n, err := conn.Read(buffer)
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = json.Unmarshal(buffer[:n], &msg)
+			if msg.Type == "request" {
+                fmt.Printf("--------------------%v\n",msg)
+				msg.Type = "response"
+				msg.Cpupayload = a.GetCpu()
+				msg.Ifacepayload = a.ListIface()
+				data, err := json.Marshal(msg)
+				if err != nil {
+					log.Fatal(err)
+				}
+				_, err = conn.Write(data)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			defer wg.Done()
+			defer conn.Close()
+			time.Sleep(1 * time.Second)
 		}
-		_, err = conn.Write(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer conn.Close()
-		defer wg.Done()
-		time.Sleep(1 * time.Second)
+
 	}()
 }

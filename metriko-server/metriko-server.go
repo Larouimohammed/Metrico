@@ -49,24 +49,22 @@ func (s *Server) Start() {
 		return
 	}
 	buffer := make([]byte, 1024)
-
 	for {
+		msg := Message{}
+		msg.Type = "request"
+		data, err := json.Marshal(msg)
+		conn.Write(data)
 		n, err := conn.Read(buffer)
 		if err != nil {
 			//fmt.Printf("can't read from connection :%v\n", err)
 		}
-
-		var msg Message
-
 		err = json.Unmarshal(buffer[:n], &msg)
 		if err != nil {
-
-			// fmt.Printf("can't unmarshal json :%v\n", err)
+			//   fmt.Printf("can't unmarshal json :%v\n", err)
 			continue
 		}
-
+		fmt.Printf("data received %+v\n", msg)
 		s.InsertinDB(msg.Cpupayload, msg.Ifacepayload)
-
 		time.Sleep(1 * time.Second)
 	}
 }
