@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"metriko/db"
-	metricagent "metriko/metriko-agent"
+	metrikoagent "metriko/metriko-agent"
 	metrikoapi "metriko/metriko-api"
 	metrikoserver "metriko/metriko-server"
 	"net"
@@ -37,13 +37,13 @@ func main() {
 	go api.Run(wg)
 
 	//run metriko agent
-	agent := metricagent.NewAgent(net.IPAddr{IP: net.IPv4(192, 168, 1, 11)}, addrServer)
+
+	agent := metrikoagent.NewAgent(net.IPAddr{IP: net.IPv4(192, 168, 1, 11)}, addrServer)
 	go agent.StartMetriko(wg)
 
 	//run server
 	server := metrikoserver.NewServer(c, i, addrServer)
 	server.Start()
 	wg.Wait()
-
 
 }

@@ -65,7 +65,7 @@ func (s *Server) Start() {
 			continue
 		}
 
-		//fmt.Printf("Message data Received: %+v\n", msg.Cpupayload.Version)
+		
 
 		s.InsertinDB(msg.Cpupayload, msg.Ifacepayload)
 
