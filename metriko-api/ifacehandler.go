@@ -1,4 +1,4 @@
-package handlers
+package metrikoapi
 
 import (
 	"log"

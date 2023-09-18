@@ -1,4 +1,4 @@
-package metric
+package metrikoagent
 
 import (
 	"log"
@@ -7,9 +7,7 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
-
-
-func ListIface() []hardware.Iface {
+func (a *Agent) ListIface() []hardware.Iface {
 	var Inface hardware.Iface
 	var Infaces []hardware.Iface
 	nt, _ := netlink.LinkList()

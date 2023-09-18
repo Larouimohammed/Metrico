@@ -8,10 +8,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
 type CpuMetricStor interface {
-	Insertcpu(ctx context.Context, cpu *hardware.CPU) (*hardware.CPU, error)
-	GetCpus(ctx context.Context) ([]*hardware.CPU, error)
+	Insertcpu(ctx context.Context, cpu hardware.CPU) (*hardware.CPU, error)
+	GetCpus(ctx context.Context) (*[]hardware.CPU, error)
 	GetCpuByID(ctx context.Context, id string) (*hardware.CPU, error)
 }
 
@@ -26,26 +25,26 @@ func NewMongoCpuMetricStore(client *mongo.Client,db_name string) *MongoIfaceMetr
 		coll:   client.Database(db_name).Collection("cpu"),
 	}
 }
-func (s *MongoIfaceMetricstor) Insertcpu(ctx context.Context, cpu *hardware.CPU) (*hardware.CPU, error) {
+func (s *MongoIfaceMetricstor) Insertcpu(ctx context.Context, cpu hardware.CPU) (*hardware.CPU, error) {
 	resp, err := s.coll.InsertOne(ctx, cpu)
 	if err != nil {
 		return nil, err
 	}
 	cpu.ID = resp.InsertedID.(primitive.ObjectID)
 
-	return cpu, nil
+	return &cpu, nil
 }
-func (s *MongoIfaceMetricstor) GetCpus(ctx context.Context) ([]*hardware.CPU, error) {
+func (s *MongoIfaceMetricstor) GetCpus(ctx context.Context) (*[]hardware.CPU, error) {
 	cur, err := s.coll.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
-	var cpus []*hardware.CPU
+	var cpus []hardware.CPU
 	if err := cur.All(ctx, &cpus); err != nil {
 		return nil, err
 	}
 
-	return cpus, nil
+	return &cpus, nil
 }
 
 func (s *MongoIfaceMetricstor) GetCpuByID(ctx context.Context, id string) (*hardware.CPU, error) {
@@ -53,9 +52,9 @@ func (s *MongoIfaceMetricstor) GetCpuByID(ctx context.Context, id string) (*hard
 	if err != nil {
 		return nil, err
 	}
-	var user hardware.CPU
-	if err := s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&user); err != nil {
+	var cpu hardware.CPU
+	if err := s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&cpu); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return &cpu, nil
 }

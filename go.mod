@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
+	github.com/sirupsen/logrus v1.9.3
 	github.com/vishvananda/netlink v1.1.0
 	go.mongodb.org/mongo-driver v1.12.1
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc

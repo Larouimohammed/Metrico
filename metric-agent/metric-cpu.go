@@ -1,4 +1,4 @@
-package metric
+package metrikoagent
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"gopkg.in/xmlpath.v2"
 )
 
-func GetCpu() *hardware.CPU {
+func (a *Agent) GetCpu() hardware.CPU {
 
 	var CPU hardware.CPU
 
@@ -42,5 +42,5 @@ func GetCpu() *hardware.CPU {
 		CPU.Width = value
 	}
 
-	return &CPU
+	return CPU
 }
