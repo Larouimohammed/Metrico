@@ -7,15 +7,17 @@ import (
 	"log"
 	"metriko/db"
 	"metriko/hardware"
-	metrikoagent "metriko/metric-agent"
 	"net"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
-//get metric from metric agent
-//server isert metric in db
+type Message struct {
+	Type         string
+	Cpupayload   hardware.CPU
+	Ifacepayload []hardware.Iface
+}
 
 type Server struct {
 	Addr    string
@@ -32,7 +34,7 @@ func NewServer(Cpudb db.CpuMetricStor, Ifacedb db.IfaceMetricStor, addr string) 
 }
 
 func (s *Server) Start() {
-	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Server Starting on adress :"+ s.Addr)
+	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Server Starting on adress :" + s.Addr)
 
 	listener, err := net.Listen("tcp", s.Addr)
 	if err != nil {
@@ -54,7 +56,7 @@ func (s *Server) Start() {
 			//fmt.Printf("can't read from connection :%v\n", err)
 		}
 
-		var msg metrikoagent.Message
+		var msg Message
 
 		err = json.Unmarshal(buffer[:n], &msg)
 		if err != nil {
@@ -64,7 +66,7 @@ func (s *Server) Start() {
 		}
 
 		//fmt.Printf("Message data Received: %+v\n", msg.Cpupayload.Version)
-        
+
 		s.InsertinDB(msg.Cpupayload, msg.Ifacepayload)
 
 		time.Sleep(1 * time.Second)
