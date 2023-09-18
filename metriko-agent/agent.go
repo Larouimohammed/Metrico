@@ -29,7 +29,7 @@ func NewAgent(machine net.IPAddr, addr string) *Agent {
 		Addr:    addr,
 	}
 }
-func (a *Agent) SendMetriko(wg *sync.WaitGroup) {
+func (a *Agent) StartMetriko(wg *sync.WaitGroup) {
 	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Agent Starting on adress :" + a.Addr)
 
 	conn, err := net.Dial("tcp", a.Addr)

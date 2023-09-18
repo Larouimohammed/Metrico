@@ -38,7 +38,7 @@ func main() {
 
 	//run metriko agent
 	agent := metricagent.NewAgent(net.IPAddr{IP: net.IPv4(192, 168, 1, 11)}, addrServer)
-	go agent.SendMetriko(wg)
+	go agent.StartMetriko(wg)
 
 	//run server
 	server := metrikoserver.NewServer(c, i, addrServer)
