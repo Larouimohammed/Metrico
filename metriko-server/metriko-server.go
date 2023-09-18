@@ -65,8 +65,6 @@ func (s *Server) Start() {
 			continue
 		}
 
-		
-
 		s.InsertinDB(msg.Cpupayload, msg.Ifacepayload)
 
 		time.Sleep(1 * time.Second)
