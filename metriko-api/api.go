@@ -29,9 +29,11 @@ func NewApi(client *mongo.Client, addr string, db_name string, db_cpu_stor db.Cp
 		db_iface_stor: db_iface_stor,
 	}
 }
-func (a *Api) Run(wg *sync.WaitGroup) {
-	go func() {
+func (a *Api) Run(wg *sync.WaitGroup, cond *sync.Cond) {
+	go func(*sync.WaitGroup, *sync.Cond) {
 		wg.Add(1)
+		cond.L.Lock()
+		cond.Wait()
 		logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("API starting on adress :" + a.addr)
 
 		cpuhandler := NewCpuHandler(a.db_cpu_stor)
@@ -50,5 +52,5 @@ func (a *Api) Run(wg *sync.WaitGroup) {
 		}
 
 		defer wg.Done()
-	}()
+	}(wg, cond)
 }

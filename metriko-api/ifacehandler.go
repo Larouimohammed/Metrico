@@ -17,17 +17,6 @@ func NewIfaceHandler(ifaceStore db.IfaceMetricStor) *IfaceHandler {
 	}
 }
 
-func (s *IfaceHandler) GetIfaces(c *gin.Context) {
-
-	Infaces, err := s.IfaceStore.GetIfaces(c)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	c.Bind(&Infaces)
-	c.JSON(200, Infaces)
-}
-
 func (s *IfaceHandler) GetIfacesByID(c *gin.Context) {
 	id := c.Param("id")
 	iface, err := s.IfaceStore.GetIfaceByID(c, id)
@@ -38,4 +27,13 @@ func (s *IfaceHandler) GetIfacesByID(c *gin.Context) {
 	c.Bind(&iface)
 	c.JSON(200, iface)
 
+}
+func (s *IfaceHandler) GetIfaces(c *gin.Context) {
+	Infaces, err := s.IfaceStore.GetIfaces(c)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.Bind(&Infaces)
+	c.JSON(200, Infaces)
 }

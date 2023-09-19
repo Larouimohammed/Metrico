@@ -29,8 +29,8 @@ func NewAgent(machine net.IPAddr, addr string) *Agent {
 		Addr:    addr,
 	}
 }
-func (a *Agent) StartMetriko(wg *sync.WaitGroup) {
-	go func() {
+func (a *Agent) StartMetriko(wg *sync.WaitGroup, cond *sync.Cond) {
+	go func(*sync.WaitGroup) {
 		wg.Add(1)
 		logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Agent Starting on adress :" + a.Addr)
 
@@ -41,6 +41,7 @@ func (a *Agent) StartMetriko(wg *sync.WaitGroup) {
 		}
 		buffer := make([]byte, 1024)
 		var msg Message
+		cond.Signal()
 
 		for {
 			n, err := conn.Read(buffer)
@@ -49,23 +50,23 @@ func (a *Agent) StartMetriko(wg *sync.WaitGroup) {
 			}
 			err = json.Unmarshal(buffer[:n], &msg)
 			if msg.Type == "request" {
-                fmt.Printf("--------------------%v\n",msg)
-				msg.Type = "response"
 				msg.Cpupayload = a.GetCpu()
 				msg.Ifacepayload = a.ListIface()
-				data, err := json.Marshal(msg)
-				if err != nil {
-					log.Fatal(err)
-				}
-				_, err = conn.Write(data)
-				if err != nil {
-					log.Fatal(err)
-				}
+
+			}
+			msg.Type = "response"
+			data, err := json.Marshal(msg)
+			if err != nil {
+				log.Fatal(err)
+			}
+			_, err = conn.Write(data)
+			if err != nil {
+				log.Fatal(err)
 			}
 			defer wg.Done()
 			defer conn.Close()
 			time.Sleep(1 * time.Second)
 		}
 
-	}()
+	}(wg)
 }

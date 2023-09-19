@@ -35,13 +35,11 @@ func NewServer(Cpudb db.CpuMetricStor, Ifacedb db.IfaceMetricStor, addr string) 
 
 func (s *Server) Start() {
 	logrus.WithFields(logrus.Fields{"time": time.Now()}).Info("Metriko Server Starting on adress :" + s.Addr)
-
 	listener, err := net.Listen("tcp", s.Addr)
 	if err != nil {
 		fmt.Println("Error listening:", err)
 		return
 	}
-	defer listener.Close()
 
 	conn, err := listener.Accept()
 	if err != nil {
@@ -56,27 +54,26 @@ func (s *Server) Start() {
 		conn.Write(data)
 		n, err := conn.Read(buffer)
 		if err != nil {
-			//fmt.Printf("can't read from connection :%v\n", err)
+			fmt.Printf("can't read from connection :%v\n", err)
+			continue
 		}
 		err = json.Unmarshal(buffer[:n], &msg)
 		if err != nil {
-			//   fmt.Printf("can't unmarshal json :%v\n", err)
+			fmt.Printf("can't unmarshal json :%v\n", err)
 			continue
 		}
-		fmt.Printf("data received %+v\n", msg)
-		s.InsertinDB(msg.Cpupayload, msg.Ifacepayload)
+
+		_, err = s.Cpudb.Insertcpu(context.Background(), msg.Cpupayload)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// fmt.Println(msg)
+		err = s.Ifacedb.InsertIface(context.Background(), msg.Ifacepayload)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer listener.Close()
 		time.Sleep(1 * time.Second)
 	}
-}
-func (s *Server) InsertinDB(cpu hardware.CPU, inface []hardware.Iface) {
-
-	_, err := s.Cpudb.Insertcpu(context.Background(), cpu)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = s.Ifacedb.InsertIface(context.Background(), inface)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 }
