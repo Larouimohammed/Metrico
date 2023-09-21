@@ -4,5 +4,7 @@ docker run --name mongodb -d mongo:latest -p 27017:27017
 go get go.mongodb.org/mongo-driver/mongo
 # install gin library for go
 go get github.com/gin-gonic/gin
-# runnig Metriko app{Server+API+Agent}
+# runnig Metriko Server{Server+API}
 make run
+# running metriko agent
+make run-metriko
